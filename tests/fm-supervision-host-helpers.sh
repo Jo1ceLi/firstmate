@@ -175,6 +175,41 @@ unset FM_SUPERVISION_ACTOR FM_BRANCH_REPORT_TURN FM_LEASE_HOLDER_PID PI_CODING_A
 # Homes are registered in a file: make_home runs in a command substitution,
 # whose variables never reach this shell.
 HOMES_FILE="$TMP_ROOT/homes"
+# Reap <pid> without hanging if it never exits. An already-exited child
+# (including a zombie) is waited immediately, matching an unbounded wait.
+# A process that stays alive is polled, then sent TERM, then KILL, then reaped.
+wait_pid_bounded() {  # <pid>
+  local pid=$1 i=0 state
+  [ -n "$pid" ] || return 0
+  state=$(ps -o state= -p "$pid" 2>/dev/null | awk '{ print $1 }')
+  if [ -z "$state" ] || [ "$state" = Z ]; then
+    wait "$pid" 2>/dev/null || true
+    return 0
+  fi
+  while [ "$i" -lt 50 ]; do
+    state=$(ps -o state= -p "$pid" 2>/dev/null | awk '{ print $1 }')
+    if [ -z "$state" ] || [ "$state" = Z ]; then
+      wait "$pid" 2>/dev/null || true
+      return 0
+    fi
+    sleep 0.1
+    i=$((i + 1))
+  done
+  kill -TERM "$pid" 2>/dev/null || true
+  i=0
+  while [ "$i" -lt 20 ]; do
+    state=$(ps -o state= -p "$pid" 2>/dev/null | awk '{ print $1 }')
+    if [ -z "$state" ] || [ "$state" = Z ]; then
+      wait "$pid" 2>/dev/null || true
+      return 0
+    fi
+    sleep 0.1
+    i=$((i + 1))
+  done
+  kill -KILL "$pid" 2>/dev/null || true
+  wait "$pid" 2>/dev/null || true
+}
+
 # Stop whatever a case left running, by the exact pids its home recorded.
 stop_home_processes() {  # <home>
   local home=$1 pid arms='' i=0
@@ -194,7 +229,7 @@ stop_home_processes() {  # <home>
   [ -z "$pid" ] || kill -TERM "$pid" 2>/dev/null || true
   while IFS= read -r pid; do
     if [ -e "$home/session.stop" ]; then
-      wait "$pid" 2>/dev/null || true
+      wait_pid_bounded "$pid"
     else
       kill -TERM "$pid" 2>/dev/null || true
     fi
