@@ -23,8 +23,7 @@ LEASE="$ROOT/bin/fm-lease.sh"
 command -v node >/dev/null 2>&1 || { printf 'skip: node absent\n'; exit 0; }
 command -v perl >/dev/null 2>&1 || { printf 'skip: perl absent\n'; exit 0; }
 
-_fm_host_suite=$(basename "${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}" .test.sh)
-TMP_ROOT=$(fm_test_tmproot "$_fm_host_suite")
+TMP_ROOT=$(fm_test_tmproot fm-supervision-host)
 FAKEBIN=$(fm_fakebin "$TMP_ROOT/fakebin")
 ln -s /bin/bash "$FAKEBIN/claude"
 FAKE_CLAUDE="$FAKEBIN/claude"
@@ -186,11 +185,15 @@ pid_gone() {  # <pid>
   [ -z "$state" ] || [ "$state" = Z ]
 }
 
-# True when <pid> is a background child of this shell. A recorded pid that is
-# not ours (already reaped, or reused after EXIT cleanup) must not be bounded.
-# jobs -p is written from this shell: command substitution would hide jobs.
+# True when <pid> is a live background child of this shell. jobs -p still lists
+# exited jobs that were never waited, so a reused pid can match that list;
+# also require that pid's ppid is this shell. A recorded pid that is not ours
+# must not be bounded. jobs -p is written from this shell: command substitution
+# would hide jobs.
 this_shell_child() {  # <pid>
-  local p
+  local p ppid
+  ppid=$(ps -o ppid= -p "$1" 2>/dev/null | awk '{ print $1 }')
+  [ "$ppid" = "$$" ] || return 1
   jobs -p > "$TMP_ROOT/jobs.pids"
   while IFS= read -r p; do
     [ "$p" = "$1" ] && return 0
