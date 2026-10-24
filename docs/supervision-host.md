@@ -411,8 +411,8 @@ Each arm owner's own suite covers its host mode against a stub host.
 
 | Test | What it covers |
 |---|---|
-| `tests/fm-supervision-host-engine.test.sh` | Drives the real host against a stub engine: engine turns, latch recovery, park bounds, and dialog feed. |
-| `tests/fm-supervision-host-hook.test.sh` | Drives the real Claude Stop hook around that host: rewake, pass-through, successor takeover, and default-on/opt-out, plus the report/drain surface and attended close routing. |
+| `tests/fm-supervision-host-a.test.sh` | One CI-cost-balanced half of the former combined host suite: dialog feed, attended latched-close skip, park-seconds and first-cycle cases, tagged lock, and mixed Stop-hook and report-surface cases. |
+| `tests/fm-supervision-host-b.test.sh` | The other half: attended and away latch recovery, park-limit, silent return, remaining engine-turn bounds, and remaining Stop-hook takeover cases. |
 | `tests/fm-claude-stop-autoarm.test.sh` | The Claude arm owner's host mode against a stub host. |
 | `tests/fm-cursor-primary.test.sh` | The Cursor arm owner's host mode against a stub host. |
 | `tests/fm-pi-watch-extension.test.sh` | The OpenCode plugin's host mode against a stub host. |

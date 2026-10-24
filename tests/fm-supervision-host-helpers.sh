@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/fm-supervision-host-helpers.sh - shared fixtures for the supervision
-# host suites (fm-supervision-host-engine and fm-supervision-host-hook).
+# host suites (fm-supervision-host-a and fm-supervision-host-b).
 #
 # The stub engine, fixture homes, fake Claude session, and process reaping
 # encode host/hook behavior, so they live here rather than in the generic
@@ -12,12 +12,13 @@ set -u
 . "$(dirname "${BASH_SOURCE[0]}")/wake-helpers.sh"
 
 HOST="$ROOT/bin/fm-supervision-host.sh"
+# shellcheck disable=SC2034 # Sourced suites consume these; helpers.sh is also a lint root.
 REPORT="$ROOT/bin/fm-branch-report.sh"
+# shellcheck disable=SC2034 # Sourced suites consume these; helpers.sh is also a lint root.
 DISPATCH="$ROOT/bin/fm-branch-dispatch.mjs"
 CONTRACT="$ROOT/bin/fm-afk-contract.sh"
+# shellcheck disable=SC2034 # Sourced suites consume these; helpers.sh is also a lint root.
 LEASE="$ROOT/bin/fm-lease.sh"
-# Sourced suites consume these; helpers.sh is also a lint root.
-export REPORT DISPATCH LEASE
 
 command -v node >/dev/null 2>&1 || { printf 'skip: node absent\n'; exit 0; }
 command -v perl >/dev/null 2>&1 || { printf 'skip: perl absent\n'; exit 0; }
@@ -177,20 +178,40 @@ unset FM_SUPERVISION_ACTOR FM_BRANCH_REPORT_TURN FM_LEASE_HOLDER_PID PI_CODING_A
 # Homes are registered in a file: make_home runs in a command substitution,
 # whose variables never reach this shell.
 HOMES_FILE="$TMP_ROOT/homes"
-# Reap <pid> without hanging if it never exits. An already-exited child
-# (including a zombie) is waited immediately, matching an unbounded wait.
-# A process that stays alive is polled, then sent TERM, then KILL, then reaped.
+# True when <pid> is gone or already a zombie. One ps-state read for the
+# grace / TERM / KILL sequence in wait_pid_bounded.
+pid_gone() {  # <pid>
+  local state
+  state=$(ps -o state= -p "$1" 2>/dev/null | awk '{ print $1 }')
+  [ -z "$state" ] || [ "$state" = Z ]
+}
+
+# True when <pid> is a background child of this shell. A recorded pid that is
+# not ours (already reaped, or reused after EXIT cleanup) must not be bounded.
+# jobs -p is written from this shell: command substitution would hide jobs.
+this_shell_child() {  # <pid>
+  local p
+  jobs -p > "$TMP_ROOT/jobs.pids"
+  while IFS= read -r p; do
+    [ "$p" = "$1" ] && return 0
+  done < "$TMP_ROOT/jobs.pids"
+  return 1
+}
+
+# Reap <pid> without hanging if it never exits. Only bound a real child of
+# this shell: plain wait returns immediately for any other pid, matching the
+# unbounded wait, so EXIT cleanup cannot TERM/KILL a reused pid. An already-
+# exited child (including a zombie) is waited immediately. A child that stays
+# alive is given one grace, then TERM, then KILL, then reaped.
 wait_pid_bounded() {  # <pid>
-  local pid=$1 i=0 state
+  local pid=$1 i=0
   [ -n "$pid" ] || return 0
-  state=$(ps -o state= -p "$pid" 2>/dev/null | awk '{ print $1 }')
-  if [ -z "$state" ] || [ "$state" = Z ]; then
+  if ! this_shell_child "$pid"; then
     wait "$pid" 2>/dev/null || true
     return 0
   fi
   while [ "$i" -lt 50 ]; do
-    state=$(ps -o state= -p "$pid" 2>/dev/null | awk '{ print $1 }')
-    if [ -z "$state" ] || [ "$state" = Z ]; then
+    if pid_gone "$pid"; then
       wait "$pid" 2>/dev/null || true
       return 0
     fi
@@ -200,8 +221,7 @@ wait_pid_bounded() {  # <pid>
   kill -TERM "$pid" 2>/dev/null || true
   i=0
   while [ "$i" -lt 20 ]; do
-    state=$(ps -o state= -p "$pid" 2>/dev/null | awk '{ print $1 }')
-    if [ -z "$state" ] || [ "$state" = Z ]; then
+    if pid_gone "$pid"; then
       wait "$pid" 2>/dev/null || true
       return 0
     fi
@@ -756,13 +776,14 @@ park_outcome() {  # <name> <park-seconds>; sets PARK_OUTCOME to boundary or hand
   if host_exited "$home"; then
     grep -q '^supervision-host: cycle boundary - ' "$home/host.out" || fail "$1: the host exited without the boundary: $(cat "$home/host.out")"
     ! ls "$home"/engine-call.* >/dev/null 2>&1 || fail "$1: an engine turn ran before the boundary exit"
+    # shellcheck disable=SC2034 # park_seconds test reads PARK_OUTCOME after return.
     PARK_OUTCOME=boundary
   else
     kill -TERM "$(awk -F '\t' '$1 == "host" { print $2 }' "$home/state/.supervision-host")"
     wait_until 200 host_exited "$home" || fail "$1: the host did not stop on TERM"
+    # shellcheck disable=SC2034 # park_seconds test reads PARK_OUTCOME after return.
     PARK_OUTCOME=handled
   fi
-  export PARK_OUTCOME
 }
 
 # Main's side of a handed-back wake: drain, then run the printed acknowledgement.

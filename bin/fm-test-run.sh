@@ -407,7 +407,7 @@ family_for_basename() {
       printf '%s\n' pr-forge
       ;;
     fm-afk-contract.test.sh|fm-afk-inject-e2e.test.sh|fm-afk-return.test.sh|\
-    fm-supervision-host-engine.test.sh|fm-supervision-host-hook.test.sh|fm-host-mirror.test.sh)
+    fm-supervision-host-a.test.sh|fm-supervision-host-b.test.sh|fm-host-mirror.test.sh)
       printf '%s\n' afk
       ;;
     fm-bearings-board-render.test.sh|fm-bearings-snapshot.test.sh|fm-contributions.test.sh|\
@@ -876,9 +876,9 @@ tests/fm-stat-shadowing.test.sh 75
 tests/fm-stow-cascade.test.sh 3058
 tests/fm-subagent-pretool-check.test.sh 998
 tests/fm-supervision-events.test.sh 673
+tests/fm-supervision-host-a.test.sh 596734
 tests/fm-supervision-host-attended-live-e2e.test.sh 49
-tests/fm-supervision-host-engine.test.sh 605208
-tests/fm-supervision-host-hook.test.sh 587710
+tests/fm-supervision-host-b.test.sh 596184
 tests/fm-supervision-host-live-e2e.test.sh 75
 tests/fm-tangle-guard.test.sh 8501
 tests/fm-task-delivery.test.sh 32789
@@ -1583,8 +1583,8 @@ families_for_changed_path() {
       printf '%s\n' __script__:fm-watch-recovery-loop.test.sh
       printf '%s\n' __script__:fm-wake-queue.test.sh
       printf '%s\n' __script__:fm-pi-primary-types.test.sh
-      printf '%s\n' __script__:fm-supervision-host-engine.test.sh
-      printf '%s\n' __script__:fm-supervision-host-hook.test.sh
+      printf '%s\n' __script__:fm-supervision-host-a.test.sh
+      printf '%s\n' __script__:fm-supervision-host-b.test.sh
       # Whether an arriving outcome still lets the captain type is a fact only
       # a real Pi TUI can answer, so the live guards are selected too.
       printf '%s\n' live-harness-optin
