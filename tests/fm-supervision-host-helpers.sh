@@ -16,6 +16,8 @@ REPORT="$ROOT/bin/fm-branch-report.sh"
 DISPATCH="$ROOT/bin/fm-branch-dispatch.mjs"
 CONTRACT="$ROOT/bin/fm-afk-contract.sh"
 LEASE="$ROOT/bin/fm-lease.sh"
+# Sourced suites consume these; helpers.sh is also a lint root.
+export REPORT DISPATCH LEASE
 
 command -v node >/dev/null 2>&1 || { printf 'skip: node absent\n'; exit 0; }
 command -v perl >/dev/null 2>&1 || { printf 'skip: perl absent\n'; exit 0; }
@@ -760,6 +762,7 @@ park_outcome() {  # <name> <park-seconds>; sets PARK_OUTCOME to boundary or hand
     wait_until 200 host_exited "$home" || fail "$1: the host did not stop on TERM"
     PARK_OUTCOME=handled
   fi
+  export PARK_OUTCOME
 }
 
 # Main's side of a handed-back wake: drain, then run the printed acknowledgement.

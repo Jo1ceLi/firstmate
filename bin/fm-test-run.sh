@@ -877,8 +877,8 @@ tests/fm-stow-cascade.test.sh 3058
 tests/fm-subagent-pretool-check.test.sh 998
 tests/fm-supervision-events.test.sh 673
 tests/fm-supervision-host-attended-live-e2e.test.sh 49
-tests/fm-supervision-host-engine.test.sh 596459
-tests/fm-supervision-host-hook.test.sh 596459
+tests/fm-supervision-host-engine.test.sh 605208
+tests/fm-supervision-host-hook.test.sh 587710
 tests/fm-supervision-host-live-e2e.test.sh 75
 tests/fm-tangle-guard.test.sh 8501
 tests/fm-task-delivery.test.sh 32789
