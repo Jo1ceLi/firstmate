@@ -238,6 +238,8 @@ wait_pid_bounded() {  # <pid>
 # Stop whatever a case left running, by the exact pids its home recorded.
 stop_home_processes() {  # <home>
   local home=$1 pid arms='' i=0
+  pid=$(cut -f1 "$home/state/.supervision-handoff-owner" 2>/dev/null || true)
+  [ -z "$pid" ] || kill -TERM "$pid" 2>/dev/null || true
   if [ -f "$home/state/.supervision-host" ]; then
     arms=$(awk -F '\t' '$1 == "arm" { print $2 }' "$home/state/.supervision-host")
     pid=$(awk -F '\t' '$1 == "host" { print $2; exit }' "$home/state/.supervision-host")
@@ -263,6 +265,64 @@ stop_home_processes() {  # <home>
     kill -TERM "$pid" 2>/dev/null || true
   done < <(cat "$home/orphan-pid" 2>/dev/null)
 }
+
+assert_lost_handoff_keeps_watching() {  # <boundary|pass-through>
+  local mode=$1 home watcher
+  home=$(make_primary_home "lost-handoff-$mode")
+  : > "$home/config/supervision-handoff-ack"
+  : > "$home/hook.own-group"
+  printf 'project=demo\nwindow=fm-other\nharness=claude\n' > "$home/state/other.meta"
+  FM_SUPERVISION_HANDOFF_RETRY_SECONDS=3 FM_SUPERVISION_HOST_PARK_SECONDS=3600 \
+    FM_TEST_SUPERVISION_HOST_CLOCK="$home/park-clock" start_hook_session "$home"
+  turn_end "$home"
+  wait_until 150 watcher_live "$home" || fail "$mode: no initial watcher"
+  if [ "$mode" = boundary ]; then
+    echo 3600 > "$home/park-clock"
+  else
+    append_status "$home" 'which export format?' needs-decision
+  fi
+  wait_until 250 hook_exited "$home" || fail "$mode: no hand-back"
+  assert_rewoke_main "$home" "$mode"
+  # The hand-back keeps the row the default path writes: it is what the
+  # diagnosis of an unsupervised home reads first.
+  if [ "$mode" = boundary ]; then
+    assert_re '	boundary	after [0-9]+s$' "$home/state/.supervision-host.log" "$mode: the hand-back dropped the boundary row"
+  else
+    assert_re '	pass-through	attended	main-only	' "$home/state/.supervision-host.log" "$mode: the hand-back dropped the pass-through row"
+  fi
+  kill -TERM -- "-$(cat "$home/hook.pgid")" 2>/dev/null || true
+  # Drop the continuation entirely: no drain, acknowledgement, or Stop follows.
+  watcher_live "$home" || fail "$mode: lost continuation left no verified watcher"
+  watcher=$(cat "$home/state/.watch.lock/pid")
+  printf 'working [at=%s]: another event\n' "$(date +%s)" >> "$home/state/other.status"
+  wait_until 250 bash -c '! kill -0 "$1" 2>/dev/null' _ "$watcher" \
+    || fail "$mode: the successor did not observe the later event"
+  wait_until 150 watcher_live "$home" || fail "$mode: a successor close left supervision down"
+  wait_until 150 grep -q 'retry' "$home/state/.supervision-handoff.log" \
+    || fail "$mode: the unacknowledged hand-back was not raised again"
+  assert_grep 'other.status' "$home/state/.wake-queue" "the later event must stay durable"
+  assert_grep 'supervision-handoff' "$home/state/.wake-queue" "the hand-back must remain acknowledgeable"
+  main_drain "$home" > "$home/main-drain.out"
+  assert_grep 'supervision-handoff' "$home/main-drain.out" "main must receive the hand-back again"
+  [ -n "$MAIN_ACK" ] || fail "$mode: no main acknowledgement"
+  [ -f "$home/state/.supervision-handoff-pending" ] || fail "$mode: presentation incorrectly confirmed ownership"
+  FM_HOME="$home" "$FAKE_CLAUDE" -c '"$0" "$@"' "$ROOT/bin/fm-wake-drain.sh" \
+    --ack-through 0 --recovery-generation "${MAIN_ACK##* }" > "$home/stale-ack.out" 2>&1 \
+    || fail "$mode: the stale acknowledgement could not be checked"
+  [ -f "$home/state/.supervision-handoff-pending" ] || fail "$mode: a stale acknowledgement confirmed unseen work"
+  # shellcheck disable=SC2086 # The drain's printed arguments.
+  FM_HOME="$home" "$FAKE_CLAUDE" -c '"$0" "$@"' "$ROOT/bin/fm-wake-drain.sh" $MAIN_ACK \
+    || fail "$mode: main could not acknowledge"
+  wait_until 150 bash -c '[ ! -e "$1/state/.supervision-handoff-pending" ]' _ "$home" \
+    || fail "$mode: acknowledgement did not confirm ownership"
+  watcher_live "$home" || fail "$mode: acknowledgement stopped supervision"
+  echo 0 > "$home/park-clock"
+  turn_end "$home"
+  wait_until 250 host_owns_the_only_cycle "$home" || fail "$mode: the next park did not take over exactly one watcher"
+  stop_home_processes "$home"
+  pass "host+hook: $mode survives a lost continuation, retries, and transfers one watcher after acknowledgement"
+}
+
 suite_cleanup() {
   local home
   while IFS= read -r home; do

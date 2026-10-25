@@ -1003,6 +1003,7 @@ test_park_boundary_ends_the_park_before_the_hook_timeout() {
   wait_until 150 host_exited "$home" || fail "boundary: the host did not end its park"
   assert_re '^supervision-host: cycle boundary - ' "$home/host.out" "the park boundary must reach main as a host line"
   watcher_live "$home" && fail "the park boundary left the watcher running"
+  [ ! -e "$home/state/.supervision-handoff-pending" ] || fail "the absent opt-in changed the default boundary"
   token=$(cat "$home/state/.watcher-down")
   case "$token" in
     pending:downtime:*|announced:downtime:*) ;;
@@ -1129,6 +1130,32 @@ test_unverified_engine_hands_every_away_wake_to_main() {
   pass "host: a home naming an unverified engine hands every away wake to main with the reason"
 }
 
+
+test_lost_pass_through_handoff() { assert_lost_handoff_keeps_watching pass-through; }
+
+# A close that turns main-only at its turn hands back through the same opt-in
+# path and must keep its pass-through row too. The hand-back stops the successor
+# this turn confirmed, and the owner replaces that stopped arm within its poll,
+# so the live-watcher check waits for it.
+test_acknowledged_handoff_at_the_turn_keeps_the_pass_through_row() {
+  local home
+  home=$(make_primary_home hook-turns-main-only-ack)
+  : > "$home/config/supervision-handoff-ack"
+  turn_main_only_at_second_offer "$home"
+  start_hook_session "$home"
+  turn_end "$home"
+  wait_until 150 watcher_live "$home" || fail "ack turns-main-only: the Stop hook never started a watcher cycle: $(cat "$home/hook.err" 2>/dev/null)"
+  append_status "$home" 'step one'
+  wait_until 250 hook_exited "$home" || fail "ack turns-main-only: the Stop hook never closed: $(cat "$home/state/.supervision-host.log")"
+  [ "$(cat "$home/offer-count" 2>/dev/null)" -ge 2 ] || fail "fixture: the close was not accepted before it turned main-only"
+  assert_rewoke_main "$home" "ack turns-main-only"
+  [ -f "$home/state/.supervision-handoff-pending" ] || fail "ack turns-main-only: the close was not handed back for acknowledgement"
+  assert_re '	pass-through	attended	main-only	signal:' "$home/state/.supervision-host.log" "ack turns-main-only: the hand-back dropped the pass-through row"
+  wait_until 150 watcher_live "$home" || fail "ack turns-main-only: the hand-back left no watcher: $(cat "$home/state/.watch-cycle-exits.log")"
+  stop_home_processes "$home"
+  pass "host+hook: an acknowledged hand-back at the turn keeps its pass-through row"
+}
+
 test_main_only_close_after_handled_turn_restores_inherited_handling
 test_returned_driver_is_caught_attended
 test_claude_stop_hook_restores_handoff_when_successor_closed_before_exit_to_main
@@ -1170,3 +1197,5 @@ test_park_test_clock_requires_the_marker
 test_park_limit_lets_a_turn_outlive_the_boundary
 test_unchanged_held_outcome_reaches_the_captain_once_until_a_new_event
 test_unverified_engine_hands_every_away_wake_to_main
+test_lost_pass_through_handoff
+test_acknowledged_handoff_at_the_turn_keeps_the_pass_through_row
