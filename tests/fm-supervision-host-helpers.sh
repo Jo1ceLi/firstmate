@@ -61,12 +61,15 @@ FAKE_CLAUDE="$FAKEBIN/claude"
 #   hold-marker the same as handle, but before the result a helper takes the
 #               recovery-marker lock for a few seconds, so the host's handled-
 #               turn settle is still waiting for it (holding the queue lock)
+# A $FM_HOME/stub-tz file sets the engine's TZ, as a wrapper launching the
+# real engine binary may, independent of the host's own TZ.
 STUB="$TMP_ROOT/engine-stub"
 cat > "$STUB" <<'SH'
 #!/usr/bin/env bash
 set -u
 STATE=${FM_STATE_OVERRIDE:-$FM_HOME/state}
 mode=$(cat "$FM_HOME/stub-mode" 2>/dev/null || echo handle)
+[ ! -s "$FM_HOME/stub-tz" ] || { TZ=$(cat "$FM_HOME/stub-tz"); export TZ; }
 n=$(( $(ls "$FM_HOME"/engine-call.* 2>/dev/null | wc -l) + 1 ))
 {
   printf 'mode=%s\nactor=%s\nholder=%s\nprimary=%s\nturn=%s\n' "$mode" "${FM_SUPERVISION_ACTOR:-}" \

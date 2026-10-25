@@ -2319,6 +2319,7 @@ Current active CLI findings:
 | Session create | `rex new <label> --window <label> --cwd <dir> --json` | Returned `session_id` and `initial_windows[0].{window_id,block_ids}`. |
 | Resize | `rex block call -s <sid> -b <bid> resize '{"columns":200,"rows":50}'` | Applied to an unviewed block (`size` then read `{"columns":200,"rows":50,...,"owner":null}`). |
 | Process view | `rex block call -s <sid> -b <bid> process` | `foreground{pid,name,path,argv0,cwd}`, `ancestors[]`, and `last_exit`; `foreground.cwd` followed a nested shell started with `cd <dir> && exec /bin/sh`, and a Claude Code 2.1.308 block read `{"pid":46775,"name":"2.1.308","argv0":"claude"}` with ancestors `zsh`, `login`. |
+| Shell foreground over a harness | `rex block call -s <sid> -b <bid> process` on rex 0.0.1792787366-g623b2d, 2026-10-24 | A pane whose fish login shell started Claude Code 2.1.310 through a fish function and a bash shim read `{"foreground":{"pid":68540,"name":"fish",...},"ancestors":[treehouse, fish, login]}`, while `ps -o pid=,ppid=,pgid=,tpgid=,comm=` showed `82205 68540 68540 68540 bash` and `82263 82205 68540 68540 .../2.1.310/claude`: the harness shares the shell's foreground process group and appears only among the foreground's descendants. |
 | Plain capture | `rex capture -s <sid> -b <bid>` | A 100x10 block holding `a`, `b`, a prompt, and six blank rows returned `a\nb\n/tmp \n❯ \n`: trailing blank rows are dropped. |
 | Styled capture | `rex capture -s <sid> -b <bid> --format=vt` | The same block returned all ten rows joined by CRLF and ending in `\r\n`, so the empty bottom row is implicit. |
 | Styled read with cursor | `rex block call -s <sid> -b <bid> format '{"format":"vt","extra_cursor":true}'` | `.content` held the same CRLF-joined grid without the capture's final line feed, followed by the cursor as `ESC[<row>;<col>H` with a 1-based screen row; the adapter restores the implicit bottom row, derives the viewport as the last `size.rows` rows, and anchors the composer on that row. An idle OpenCode 1.19.3 at 200x50 ended `ESC[45;6H`, inside its composer, with its status line drawn below it (`tests/fixtures/rex-opencode-1.19.3/`). |
@@ -3200,6 +3201,23 @@ A throwaway scout was spawned through `bin/fm-spawn.sh --scout --harness omp --m
 6. `bin/fm-control.sh <id> exit` stopped the agent and `bin/fm-teardown.sh` returned the worktree and closed the item.
 
 `FM_OMP_LIVE_E2E=1 tests/fm-omp-primary-live-e2e.test.sh` refreshes the primary evidence; the worker path above is refreshed by repeating the scout dispatch after any omp upgrade.
+
+### Profile flag
+
+Verified on 2026-10-24 against omp 18.4.3 (`~/.bun/bin/omp`, a Bun package install) on macOS 15 arm64, for the [per-secondmate omp profile](../configuration.md#per-secondmate-omp-profile) pin.
+omp extracts `--profile` from anywhere in its arguments, so the flag Firstmate places right after the executable and before `--config` is honored, and it applies to subcommands such as the catalog check's `models --json`:
+
+```text
+$ OMP_SKIP_SETUP=1 omp --profile speak4 --config .omp/fm-worker-overlay.yml --version
+18.4.3
+$ OMP_SKIP_SETUP=1 omp --profile speak4 models --json | jq -r '[.models[].provider]|unique|join(" ")'
+amazon-bedrock anthropic bedrock-mantle ollama openai-codex
+$ OMP_SKIP_SETUP=1 omp --profile BAD models --json
+Error: Invalid OMP profile "BAD". Profile names must match ^[a-z0-9][a-z0-9._-]{0,63}$, cannot be "." or "..", cannot end with ".", and cannot be a Windows reserved device name (CON, PRN, AUX, NUL, COM0-9, LPT0-9, or any of those with an extension).
+```
+
+`bin/fm-omp-profile-lib.sh` enforces the same name rule before launch, and `tests/fm-omp-harness.test.sh` pins the flag position, the profile-scoped catalog check, and the unpinned launch through a fake omp.
+Repeat these commands after an omp upgrade to refresh this record.
 
 ## Busy inbox escalation
 

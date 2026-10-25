@@ -893,7 +893,7 @@ tests/fm-subagent-pretool-check.test.sh 998
 tests/fm-supervision-events.test.sh 673
 tests/fm-supervision-host-a.test.sh 631345
 tests/fm-supervision-host-attended-live-e2e.test.sh 49
-tests/fm-supervision-host-b.test.sh 618440
+tests/fm-supervision-host-b.test.sh 625882
 tests/fm-supervision-host-live-e2e.test.sh 75
 tests/fm-tangle-guard.test.sh 8501
 tests/fm-task-delivery.test.sh 32789

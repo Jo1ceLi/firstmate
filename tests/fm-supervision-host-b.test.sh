@@ -399,6 +399,31 @@ test_host_stopped_right_after_a_handled_wake_exits_and_frees_the_queue() {
   pass "host: a host stopped right after a handled wake exits and leaves the wake queue usable"
 }
 
+# A wrapper may launch the engine in another time zone than the host's (one
+# observed wrapper exports a TZ the main session's hooks never see). The
+# process-table identity that ties the branch grant to the host must read the
+# same from both, or the engine's drain discards the grant as stale, refuses,
+# and leaves every granted row for main. The proc root is hidden so Linux takes
+# the same process-table path as macOS.
+test_engine_in_another_time_zone_handles_its_granted_rows() {
+  local home no_proc
+  home=$(make_home engine-tz attended)
+  no_proc="$TMP_ROOT/engine-tz-no-proc"
+  [ "$(TZ=UTC0 LC_ALL=C ps -p $$ -o lstart=)" != "$(TZ=ENG-9 LC_ALL=C ps -p $$ -o lstart=)" ] \
+    || fail "fixture: ps renders the same start time in both time zones, so the case would prove nothing"
+  printf 'ENG-9\n' > "$home/stub-tz"
+  TZ=UTC0 FM_PROC_ROOT_OVERRIDE="$no_proc" start_host "$home"
+  wait_until 150 watcher_live "$home" || fail "engine tz: the host never started a watcher cycle: $(cat "$home/host.out")"
+  append_status "$home" 'step one'
+  wait_until 250 handled_at_least "$home" 1 \
+    || fail "engine tz: the turn did not end handled: $(cat "$home/state/.supervision-host.log"; cat "$home"/engine-drain.* 2>/dev/null)"
+  assert_no_re '	failed	' "$home/state/.supervision-host.log" "engine tz: a turn that reported for its granted rows must not fail"
+  assert_no_grep 'no branch-eligible row snapshot' "$home/engine-drain.1" "engine tz: the engine's drain discarded the host's grant"
+  assert_no_grep 'demo.status' "$home/state/.wake-queue" "engine tz: the engine's acknowledgement did not consume the wake"
+  [ ! -s "$home/host.rc" ] || fail "engine tz: the handled wake reached main: $(cat "$home/host.out")"
+  pass "host: an engine in another time zone than the host drains, reports, and acknowledges its granted rows"
+}
+
 # The file is read at every wake (docs/configuration.md "Supervision host"), so
 # an off written while the host is parked sends the next attended close to main
 # exactly as the arm printed it, with the ledger naming the opt-out.
@@ -1172,6 +1197,7 @@ test_branch_ack_keeps_older_keyed_decision_open
 test_branch_outcomes_date_an_outcome_carried_across_a_switch_off_pi
 test_branch_outcomes_keep_a_drain_presented_outcome_across_an_index_repair
 test_host_stopped_right_after_a_handled_wake_exits_and_frees_the_queue
+test_engine_in_another_time_zone_handles_its_granted_rows
 test_off_written_while_parked_passes_the_next_attended_close_to_main
 test_main_only_pass_through_leaves_the_successor_watcher_running
 test_attended_close_that_turns_main_only_before_its_turn_passes_to_main

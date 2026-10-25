@@ -34,7 +34,9 @@ Each half's original hint is that bin's share of 1192918 ms: 596734 ms for `test
 PR #7731 added four tests to the combined file, so it now has 86 bodies; those four live two per half (`test_lost_boundary_handoff` and `test_handoff_retry_respects_the_receiving_pane` in `-a`, `test_lost_pass_through_handoff` and `test_acknowledged_handoff_at_the_turn_keeps_the_pass_through_row` in `-b`).
 Isolated local walls for those four were 7499 ms and 15087 ms on `-a`, and 7012 ms and 4116 ms on `-b`.
 Estimated CI cost uses 2× local wall for the watcher hand-back cases and 1.3× for the sleep-bound retry (three-second retry interval), adding 34611 ms to `-a` and 22256 ms to `-b`.
-The packing hints are therefore 631345 ms and 618440 ms, summing to 1249785 ms (the old combined sample plus those estimates).
+The packing hints after those four were therefore 631345 ms and 618440 ms, summing to 1249785 ms (the old combined sample plus those estimates).
+PR #7265 added `test_engine_in_another_time_zone_handles_its_granted_rows` (87 bodies), which lives in `-b` after `test_host_stopped_right_after_a_handled_wake_exits_and_frees_the_queue`.
+Its isolated local wall was 3721 ms; the same 2× watcher estimate adds 7442 ms to `-b`, so the packing hints are 631345 ms and 625882 ms.
 Both stay under about 650000 ms and under the 1200000 ms packing budget.
 Until the next CI refresh replaces them with Ubuntu `duration_ms` values, treat those shares as packing weights rather than measured job wall times.
 The native-Windows-only `tests/fm-pi-windows-shell-invocation.test.sh` retains its separate 5121 ms measurement from 2026-09-06T21:02Z instead of a portable capability skip.
