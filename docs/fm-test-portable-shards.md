@@ -22,23 +22,18 @@ In particular, run 36664663190's serial 5 finished in 22m15s with an assertion f
 Collect successful per-script measurements for every member before calculating a split.
 
 `tests/fm-supervision-host-a.test.sh` and `tests/fm-supervision-host-b.test.sh` replace `tests/fm-supervision-host.test.sh`.
-The old 1192918 ms hint was the one completed successful sample from run [39642852135](https://github.com/kunchenguid/firstmate/actions/runs/39642852135); a shard that packed that script alone still cancelled at the 30-minute job cap (run 39765114423) and hung the same way on upstream run 39618934309.
-Local walls do not match CI cost: after a hook-versus-engine split, CI job logs showed the engine half still running at about 1287-1367 s when the job cap cancelled it, while the hook half finished in about 415-490 s.
-The original 82 test bodies were unchanged and split by CI cost instead.
-Per-test seconds come from `FM_TEST` lines in serial-1 job logs, collected as columns of `per_test_deltas.tsv` for jobs 120581386354 (all 82 tests), 120255718080, 120121351913, 120465368937, a PR serial-1 log, and 120583337224 (hung after 40 tests).
-Cancelled and hung jobs omit later tests; empty cells are filled from the other columns.
-Truncated pass-message prefixes match `pass` strings, with collisions resolved in the original combined-script invocation order.
-Each test's weight is its maximum observed seconds across those columns (2167 s in total).
-Longest-processing-time assignment into two bins, breaking equal-load ties toward the first bin and equal-cost ties toward original invocation order, yields 41 tests totaling 1084 s and 41 tests totaling 1083 s.
-Each half's original hint is that bin's share of 1192918 ms: 596734 ms for `tests/fm-supervision-host-a.test.sh` (`round(1192918 * 1084 / 2167)`) and 596184 ms for `tests/fm-supervision-host-b.test.sh` (the remainder so the two hints sum to 1192918).
-PR #7731 added four tests to the combined file, so it now has 86 bodies; those four live two per half (`test_lost_boundary_handoff` and `test_handoff_retry_respects_the_receiving_pane` in `-a`, `test_lost_pass_through_handoff` and `test_acknowledged_handoff_at_the_turn_keeps_the_pass_through_row` in `-b`).
-Isolated local walls for those four were 7499 ms and 15087 ms on `-a`, and 7012 ms and 4116 ms on `-b`.
-Estimated CI cost uses 2× local wall for the watcher hand-back cases and 1.3× for the sleep-bound retry (three-second retry interval), adding 34611 ms to `-a` and 22256 ms to `-b`.
-The packing hints after those four were therefore 631345 ms and 618440 ms, summing to 1249785 ms (the old combined sample plus those estimates).
-PR #7265 added `test_engine_in_another_time_zone_handles_its_granted_rows` (87 bodies), which lives in `-b` after `test_host_stopped_right_after_a_handled_wake_exits_and_frees_the_queue`.
-Its isolated local wall was 3721 ms; the same 2× watcher estimate adds 7442 ms to `-b`, so the packing hints are 631345 ms and 625882 ms.
-Both stay under about 650000 ms and under the 1200000 ms packing budget.
-Until the next CI refresh replaces them with Ubuntu `duration_ms` values, treat those shares as packing weights rather than measured job wall times.
+The 87 test bodies stay byte-identical to the combined file on `main`; packing weights are whole-file Ubuntu `duration_ms`, not shares of the old 1192918 ms combined sample.
+On 2026-10-25 those two hints, the watch-triage packing cap, and the companion serial refresh below were taken from successful timing-artifact `duration_ms` values (exit 0) across PR #7706 runs [40163854622](https://github.com/kunchenguid/firstmate/actions/runs/40163854622) (head 92f958d9, complete) and [40204257639](https://github.com/kunchenguid/firstmate/actions/runs/40204257639) (head 7f9195ec, completed shards), plus the earlier complete run [40053465414](https://github.com/kunchenguid/firstmate/actions/runs/40053465414) (head 714091c1) where a later head had no sample yet.
+The per-script samples are `scripts[].duration_ms` in each shard's `fm-test-timing-portable-serial-*` JSON and in the Behavior timing aggregate; the refresh recipe below owns the download command.
+`tests/fm-supervision-host-a.test.sh` is 674686 ms, the slowest successful sample, from run 40163854622 portable serial 2 (head 92f958d9); run 40204257639 serial 2 measured 645110 ms.
+`tests/fm-supervision-host-b.test.sh` is 481145 ms, the slowest successful sample, from run 40204257639 portable serial 3 (head 7f9195ec, after #7265); run 40163854622 serial 3 measured 352376 ms.
+`tests/fm-watch-triage.test.sh` measured 1610210 ms on run 40163854622 portable serial 1, which is above the 1200000 ms packing budget, so its packing hint is capped at that budget and longest-processing-time assignment isolates it on its own shard.
+That measured floor plus about 30 s of observed job overhead is the healthy wall for that shard; the 30-minute normal-tier job cap is the hang tripwire, not a packing target.
+Four previously understated companions were raised to their slowest successful samples from those same artifacts: `tests/fm-spawn-dispatch-profile.test.sh` 429758 ms (run 40053465414), `tests/fm-remote-secondmate-lifecycle-e2e.test.sh` 520072 ms (run 40053465414), `tests/fm-teardown.test.sh` 298951 ms (run 40053465414), and `tests/fm-watch-arm.test.sh` 217033 ms (run 40163854622).
+Twenty-two previously unhinted serial members received their first measured values from the same downloads rather than the 45000 ms default.
+A full replacement of every existing hint with those maxima, including an uncapped watch-triage, packs above the 1200000 ms budget, so the table keeps the triage cap and the four companion raises instead of a wholesale rewrite.
+The four #7731 registrations keep main's relative order: `test_lost_boundary_handoff` and `test_handoff_retry_respects_the_receiving_pane` follow `test_returned_driver_is_caught_away` in `-a`, and `test_lost_pass_through_handoff` and `test_acknowledged_handoff_at_the_turn_keeps_the_pass_through_row` follow `test_returned_driver_is_caught_attended` in `-b`.
+PR #7265's `test_engine_in_another_time_zone_handles_its_granted_rows` lives in `-b` after `test_host_stopped_right_after_a_handled_wake_exits_and_frees_the_queue`.
 The native-Windows-only `tests/fm-pi-windows-shell-invocation.test.sh` retains its separate 5121 ms measurement from 2026-09-06T21:02Z instead of a portable capability skip.
 The 2026-10-07 polytoken adapter tests carry provisional local measurements instead - 21090 ms for `tests/fm-polytoken-harness.test.sh` and the 103 ms live-guard skip for `tests/fm-polytoken-signals-live-e2e.test.sh`, both measured on the adapter-verification macOS host - until the next CI refresh replaces them with Ubuntu measurements, because they postdate the 2026-09-30 baseline.
 The 2026-10-23 `tests/fm-approval-failover.test.sh` serial hint is a provisional local measurement of 5410 ms, the slowest of five local `bin/fm-test-run.sh` samples (4991-5410 ms), until the next CI refresh replaces it with an Ubuntu timing-artifact maximum.
@@ -96,7 +91,7 @@ Its header and `--help` own the modeled-budget check and output fields; read the
 [`tests/fm-test-run.test.sh`](../tests/fm-test-run.test.sh), in `test_portable_serial_packing_budget_boundary`, verifies acceptance exactly at the budget and refusal one millisecond above it through the executable runner.
 The longest script, `tests/fm-watch-triage.test.sh`, is the indivisible floor for this layout.
 The estimates use per-file maxima from different runs, not measured rebalanced jobs or an end-to-end latency guarantee.
-The baseline watch-triage samples range from 944375 to 1074843 ms, while each observed completed portable job adds at most 30 seconds beyond its summed scripts in these runs.
+Watch-triage samples on the 2026-10-25 refresh range from 1413674 ms (run 40053465414) to 1610210 ms (run 40163854622); each observed completed portable job still adds at most 30 seconds beyond its summed scripts.
 Even so, maxima from five runs do not establish a P95 or guarantee future headroom.
 Job timeouts remain hang tripwires under the policy in [Timeouts](#timeouts) below; they are not the desired healthy duration.
 `tests/fm-ci-workflow.test.sh` compares the parsed CI matrix to the executable runner lanes, and the runner rejects parallel `--jobs` on a serial lane even when that shard has only one member.
