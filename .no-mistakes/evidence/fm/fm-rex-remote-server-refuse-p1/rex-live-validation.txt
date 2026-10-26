@@ -1,0 +1,30 @@
+## HTTP endpoint refused at spawn
+$ bin/fm-spawn.sh rex-remote-proof /Users/kunchen/.no-mistakes/worktrees/016d88035d58/01M5X0Z51MFKRP1AVCTY2K5TEV --scout --harness claude --backend rex
+endpoint=http://127.0.0.1:18723
+exit=1; elapsed=0.399s
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /Users/kunchen/.no-mistakes/worktrees/016d88035d58/01M5X0Z51MFKRP1AVCTY2K5TEV/.live-rex/lab
+error: Rex server endpoint 'http://127.0.0.1:18723' is not proven to be on this machine; Rex workers need a Rex server on this machine. For work on another host, use remote second mates (docs/remote-secondmates.md)
+
+## Unreachable endpoint fails closed
+$ bin/fm-spawn.sh rex-remote-proof /Users/kunchen/.no-mistakes/worktrees/016d88035d58/01M5X0Z51MFKRP1AVCTY2K5TEV --scout --harness claude --backend rex
+endpoint=http://127.0.0.1:18724
+exit=1; elapsed=0.460s
+fm-gate-refuse: gate agent lifecycle permitted only against lab home /Users/kunchen/.no-mistakes/worktrees/016d88035d58/01M5X0Z51MFKRP1AVCTY2K5TEV/.live-rex/lab
+error: could not determine the Rex server endpoint; Rex workers need a Rex server on this machine. For work on another host, use remote second mates (docs/remote-secondmates.md)
+
+## Local Unix endpoint accepted by actual spawn guard
+$ bash -c . bin/backends/rex.sh; fm_backend_rex_local_server_ensure; rc=$?; echo "locality guard exit=$rc"; exit "$rc"
+endpoint=unix:///Users/kunchen/.no-mistakes/worktrees/016d88035d58/01M5X0Z51MFKRP1AVCTY2K5TEV/.live-rex/rex.sock
+exit=0; elapsed=0.065s
+locality guard exit=0
+
+## Rex inventory after refused spawns
+$ /Users/kunchen/.no-mistakes/worktrees/016d88035d58/01M5X0Z51MFKRP1AVCTY2K5TEV/.live-rex/rex ls --json
+endpoint=http://127.0.0.1:18723
+exit=0; elapsed=0.032s
+{
+  "sessions": []
+}
+
+Lab state entries: []
+Lab project entries: []
