@@ -146,7 +146,7 @@ test_claude_stop_hook_restores_handoff_when_successor_closed_before_exit_to_main
   turn_end "$home"
   wait_until 150 watcher_live "$home" || fail "closed successor: the Stop hook never started a watcher cycle"
   append_status "$home" 'first actionable wake'
-  wait_until 600 hook_exited "$home" || fail "closed successor: the Stop hook did not finish: $(cat "$home/state/.supervision-host.log")"
+  wait_until_deadline 60 hook_exited "$home" || fail "closed successor: the Stop hook did not finish: $(cat "$home/state/.supervision-host.log")"
   assert_re '^supervision-host: branch-outcome: ' "$home/hook.err" "the host must hand its captain outcome to main"
   expect_code 2 "$(cat "$home/hook.rc")" "the Stop hook must rewake main after the successor closed"
   assert_re '^(pending|announced):downtime:' "$home/state/.watcher-down" \
@@ -176,7 +176,7 @@ test_claude_stop_hook_restores_handoff_when_successor_closed_mid_engine_turn() {
   assert_re '^pending:handling:' "$home/state/.watcher-down" \
     "fixture: the closed handling successor must leave the marker in handling before the host hands back"
   printf 'continue\n' > "$home/stub-release"
-  wait_until 600 hook_exited "$home" || fail "closed successor: the Stop hook did not finish: $(cat "$home/state/.supervision-host.log")"
+  wait_until_deadline 60 hook_exited "$home" || fail "closed successor: the Stop hook did not finish: $(cat "$home/state/.supervision-host.log")"
   assert_re '^supervision-host: branch-outcome: ' "$home/hook.err" "the host must hand its captain outcome to main"
   expect_code 2 "$(cat "$home/hook.rc")" "the Stop hook must rewake main after the successor closed"
   assert_re '^epoch=[0-9]+ owner_pid=[0-9]+ outcome=rewake ' "$home/state/.claude-autoarm-epoch" \
@@ -241,7 +241,7 @@ test_claude_stop_hook_rewakes_main_for_an_inbox_note_after_a_handled_wake() {
   FM_HOME="$home" "$ROOT/bin/fm-inbox.sh" note "the captain sent this from Basecamp" >/dev/null \
     || fail "fixture: the inbox note was not saved and announced"
   assert_grep 'check: captain inbox note' "$home/state/.wake-queue" "fixture: the note queued no wake row"
-  wait_until 600 hook_exited "$home" \
+  wait_until_deadline 60 hook_exited "$home" \
     || fail "inbox after handled: the queued inbox note never woke main: $(cat "$home/state/.supervision-host.log"; cat "$home/state/.watcher-down")"
   assert_rewoke_main "$home" "inbox after handled"
   assert_re '^check: rearm-resurface' "$home/hook.err" "the rewake must carry the recovery close for the queued note"
@@ -543,32 +543,28 @@ test_unrecorded_successor_is_stopped_rather_than_left_for_main() {
   pass "host+hook: a successor that cannot be recorded is stopped, and main's next turn end arms a fresh cycle"
 }
 
-if [ -n "${FM_TEST_ONLY:-}" ]; then
-  "$FM_TEST_ONLY"
-else
-  fm_test_run \
-    test_main_only_close_after_handled_turn_restores_inherited_handling \
-    test_main_only_close_after_handled_turn_delivers_restore_failure \
-    test_returned_driver_is_caught_attended \
-    test_returned_driver_is_caught_away \
-    test_lost_boundary_handoff \
-    test_lost_pass_through_handoff \
-    test_acknowledged_handoff_at_the_turn_keeps_the_pass_through_row \
-    test_handoff_retry_respects_the_receiving_pane \
-    test_claude_stop_hook_restores_handoff_when_successor_closed_before_exit_to_main \
-    test_claude_stop_hook_restores_handoff_when_successor_closed_mid_engine_turn \
-    test_claude_stop_hook_notifies_when_closed_successor_downtime_restore_fails \
-    test_claude_stop_hook_notifies_when_closed_announced_successor_downtime_restore_fails \
-    test_claude_stop_hook_delivers_a_main_only_pass_through \
-    test_claude_stop_hook_rewakes_main_for_an_inbox_note_after_a_handled_wake \
-    test_claude_stop_hook_rewakes_a_present_captain_beside_a_quiet_record \
-    test_claude_stop_hook_runs_the_host_without_the_file_and_off_opts_out \
-    test_claude_stop_hook_delivers_a_close_that_turns_main_only_at_its_turn \
-    test_successor_left_at_the_turn_survives_the_hook_process_group_teardown \
-    test_claude_stop_hook_notifies_when_at_turn_downtime_write_fails \
-    test_successor_close_during_main_turn_is_delivered_at_the_next_turn_end \
-    test_pass_through_successor_survives_the_hook_process_group_teardown \
-    test_next_park_takes_over_the_cycle_a_pass_through_left_for_main \
-    test_a_park_stopped_mid_take_over_leaves_the_take_over_to_the_next_park \
-    test_unrecorded_successor_is_stopped_rather_than_left_for_main
-fi
+fm_test_run \
+  test_main_only_close_after_handled_turn_restores_inherited_handling \
+  test_main_only_close_after_handled_turn_delivers_restore_failure \
+  test_returned_driver_is_caught_attended \
+  test_returned_driver_is_caught_away \
+  test_lost_boundary_handoff \
+  test_lost_pass_through_handoff \
+  test_acknowledged_handoff_at_the_turn_keeps_the_pass_through_row \
+  test_handoff_retry_respects_the_receiving_pane \
+  test_claude_stop_hook_restores_handoff_when_successor_closed_before_exit_to_main \
+  test_claude_stop_hook_restores_handoff_when_successor_closed_mid_engine_turn \
+  test_claude_stop_hook_notifies_when_closed_successor_downtime_restore_fails \
+  test_claude_stop_hook_notifies_when_closed_announced_successor_downtime_restore_fails \
+  test_claude_stop_hook_delivers_a_main_only_pass_through \
+  test_claude_stop_hook_rewakes_main_for_an_inbox_note_after_a_handled_wake \
+  test_claude_stop_hook_rewakes_a_present_captain_beside_a_quiet_record \
+  test_claude_stop_hook_runs_the_host_without_the_file_and_off_opts_out \
+  test_claude_stop_hook_delivers_a_close_that_turns_main_only_at_its_turn \
+  test_successor_left_at_the_turn_survives_the_hook_process_group_teardown \
+  test_claude_stop_hook_notifies_when_at_turn_downtime_write_fails \
+  test_successor_close_during_main_turn_is_delivered_at_the_next_turn_end \
+  test_pass_through_successor_survives_the_hook_process_group_teardown \
+  test_next_park_takes_over_the_cycle_a_pass_through_left_for_main \
+  test_a_park_stopped_mid_take_over_leaves_the_take_over_to_the_next_park \
+  test_unrecorded_successor_is_stopped_rather_than_left_for_main

@@ -765,7 +765,7 @@ test_large_turn_relays_an_early_visible_outcome() {
   start_host "$home"
   wait_until 150 watcher_live "$home" || fail "many receipts: the host never started a watcher cycle"
   append_status "$home" 'large turn with a visible first outcome'
-  wait_until 2000 host_exited "$home" || fail "many receipts: the captain-return handoff did not finish: host=$(cat "$home/host.out" 2>/dev/null) log=$(tail -n 8 "$home/state/.supervision-host.log" 2>/dev/null) report=$(tail -n 5 "$home/engine-report.log" 2>/dev/null) rows=$(wc -l < "$home/state/branch-outcomes.jsonl" 2>/dev/null)"
+  wait_until_deadline 60 host_exited "$home" || fail "many receipts: the captain-return handoff did not finish: host=$(cat "$home/host.out" 2>/dev/null) log=$(tail -n 8 "$home/state/.supervision-host.log" 2>/dev/null) report=$(tail -n 5 "$home/engine-report.log" 2>/dev/null) rows=$(wc -l < "$home/state/branch-outcomes.jsonl" 2>/dev/null)"
   count=$(grep -c '^supervision-host: outcome ' "$home/host.out")
   [ "$count" -eq 1 ] || fail "many receipts: expected one visible outcome, got $count: $(tail -n 5 "$home/host.out")"
   [ "$(wc -l < "$home/state/branch-outcomes.jsonl" | tr -d ' ')" -eq 1001 ] \
@@ -783,7 +783,7 @@ test_outcome_lookup_failure_is_not_treated_as_silence() {
   start_host "$home"
   wait_until 150 watcher_live "$home" || fail "lookup failure: the host never started a watcher cycle"
   append_status "$home" 'outcome lookup failure after a captain return'
-  wait_until 2000 host_exited "$home" || fail "lookup failure: the host treated an unreadable store as a silent outcome"
+  wait_until_deadline 60 host_exited "$home" || fail "lookup failure: the host treated an unreadable store as a silent outcome"
   assert_re '^supervision-host: the captain returned while the away session was handling this wake, but the recorded outcomes could not be verified; main must review them$' \
     "$home/host.out" "lookup failure: the main handoff did not explain the lookup failure"
   assert_re '^supervision-host: outcome lookup failed for turn receipt rows 1; visible outcomes may require manual review$' \
@@ -916,37 +916,33 @@ test_incomplete_engine_result_hands_the_wake_to_main() {
   pass "host: an engine turn whose result is incomplete hands its wake to main"
 }
 
-if [ -n "${FM_TEST_ONLY:-}" ]; then
-  "$FM_TEST_ONLY"
-else
-  fm_test_run \
-    test_park_exit_probe_uses_half_second_child_sleeps \
-    test_attended_routine_wake_is_handled_on_the_engine_and_stays_off_main \
-    test_host_stopped_right_after_a_handled_wake_exits_and_frees_the_queue \
-    test_engine_in_another_time_zone_handles_its_granted_rows \
-    test_attended_captain_outcome_reaches_main_through_branch_outcomes \
-    test_captain_leaving_mid_turn_keeps_its_captain_outcome_for_the_return \
-    test_quiet_record_without_its_daemon_is_a_present_captain \
-    test_attended_main_only_close_passes_straight_to_main \
-    test_off_written_while_parked_passes_the_next_attended_close_to_main \
-    test_main_only_pass_through_leaves_the_successor_watcher_running \
-    test_attended_close_with_unidentified_main_session_passes_to_main \
-    test_close_accepted_away_that_turns_attended_passes_to_main \
-    test_attended_close_that_turns_main_only_before_its_turn_passes_to_main \
-    test_primary_without_a_verified_mirror_runs_away_only \
-    test_attended_wake_carries_the_dialog_mirror \
-    test_dialog_bearing_files_are_owner_only \
-    test_undelivered_dialog_is_fed_again_on_the_next_turn \
-    test_attended_wake_with_an_unreadable_mirror_reaches_main \
-    test_away_wake_is_handled_on_the_engine_and_never_reaches_main \
-    test_away_turn_without_a_report_hands_the_wake_to_main \
-    test_return_during_an_engine_turn_hands_its_outcomes_to_main \
-    test_silent_outcomes_are_not_relayed_when_the_captain_returns \
-    test_large_turn_relays_an_early_visible_outcome \
-    test_outcome_lookup_failure_is_not_treated_as_silence \
-    test_outcome_after_the_return_survives_a_host_killed_at_the_turn_end \
-    test_next_host_clears_a_turn_its_killed_predecessor_left \
-    test_report_without_acknowledgement_hands_the_wake_to_main \
-    test_return_during_a_failed_turn_still_hands_its_outcomes_to_main \
-    test_incomplete_engine_result_hands_the_wake_to_main
-fi
+fm_test_run \
+  test_park_exit_probe_uses_half_second_child_sleeps \
+  test_attended_routine_wake_is_handled_on_the_engine_and_stays_off_main \
+  test_host_stopped_right_after_a_handled_wake_exits_and_frees_the_queue \
+  test_engine_in_another_time_zone_handles_its_granted_rows \
+  test_attended_captain_outcome_reaches_main_through_branch_outcomes \
+  test_captain_leaving_mid_turn_keeps_its_captain_outcome_for_the_return \
+  test_quiet_record_without_its_daemon_is_a_present_captain \
+  test_attended_main_only_close_passes_straight_to_main \
+  test_off_written_while_parked_passes_the_next_attended_close_to_main \
+  test_main_only_pass_through_leaves_the_successor_watcher_running \
+  test_attended_close_with_unidentified_main_session_passes_to_main \
+  test_close_accepted_away_that_turns_attended_passes_to_main \
+  test_attended_close_that_turns_main_only_before_its_turn_passes_to_main \
+  test_primary_without_a_verified_mirror_runs_away_only \
+  test_attended_wake_carries_the_dialog_mirror \
+  test_dialog_bearing_files_are_owner_only \
+  test_undelivered_dialog_is_fed_again_on_the_next_turn \
+  test_attended_wake_with_an_unreadable_mirror_reaches_main \
+  test_away_wake_is_handled_on_the_engine_and_never_reaches_main \
+  test_away_turn_without_a_report_hands_the_wake_to_main \
+  test_return_during_an_engine_turn_hands_its_outcomes_to_main \
+  test_silent_outcomes_are_not_relayed_when_the_captain_returns \
+  test_large_turn_relays_an_early_visible_outcome \
+  test_outcome_lookup_failure_is_not_treated_as_silence \
+  test_outcome_after_the_return_survives_a_host_killed_at_the_turn_end \
+  test_next_host_clears_a_turn_its_killed_predecessor_left \
+  test_report_without_acknowledgement_hands_the_wake_to_main \
+  test_return_during_a_failed_turn_still_hands_its_outcomes_to_main \
+  test_incomplete_engine_result_hands_the_wake_to_main
