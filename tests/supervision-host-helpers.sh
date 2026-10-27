@@ -307,16 +307,15 @@ wait_until() {  # <polls of 0.1s> <command...>
 # host_exited it dumps the fixture host log, supervision-host log, health
 # file, and a process tree so a CI failure is diagnosable.
 wait_until_deadline() {  # <seconds> <command...>
-  local limit=$1 start now
+  local limit=$1 start
   shift
   case "$limit" in
     ''|*[!0-9]*) return 1 ;;
   esac
-  start=$(date +%s)
+  start=$SECONDS
   while true; do
     "$@" && return 0
-    now=$(date +%s)
-    [ $((now - start)) -lt "$limit" ] || break
+    [ $((SECONDS - start)) -lt "$limit" ] || break
     sleep 0.1
   done
   case "${1:-}" in
