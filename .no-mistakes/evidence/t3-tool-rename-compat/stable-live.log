@@ -1,9 +1,108 @@
-bundle files: ['resource-monitor', 'client', 't3', 'node_modules']
-{"command": ["login", "--access", "full-access", "--url", "http://127.0.0.1:47233", "--t3", "/home/hermesadmin/.no-mistakes/worktrees/059ad4f3960e/01M5YT7QRSMYMKZZ1FNQEV2W8C/.t3-validation/stable/t3-0.1.3-linux-x64/t3", "--base-dir", "/home/hermesadmin/.no-mistakes/worktrees/059ad4f3960e/01M5YT7QRSMYMKZZ1FNQEV2W8C/.t3-validation/stable-data"], "exit": 0, "stdout": "{\"ok\":true,\"tokenFile\":\"/home/hermesadmin/.no-mistakes/worktrees/059ad4f3960e/01M5YT7QRSMYMKZZ1FNQEV2W8C/.t3-validation/stable-token\",\"origin\":\"http://127.0.0.1:47233\",\"access\":\"full-access\",\"scope\":\"orchestration:read orchestration:operate settings:write source-control:write\",\"expiresAt\":\"2026-11-26T13:59:47.149Z\",\"environmentId\":\"ff36b4ee-1f4b-470d-8c3a-470021271716\",\"serverVersion\":\"0.1.3\"}\n", "stderr": ""}
-{"command": ["status"], "exit": 0, "stdout": "{\"ok\":true,\"origin\":\"http://127.0.0.1:47233\",\"access\":\"full-access\",\"expiresAt\":\"2026-11-26T13:59:47.149Z\",\"daysLeft\":30,\"environmentId\":\"ff36b4ee-1f4b-470d-8c3a-470021271716\",\"serverVersion\":\"0.1.3\",\"recordedServerVersion\":\"0.1.3\",\"telemetry\":\"off\"}\n", "stderr": ""}
-{"gate":{"serverVersion":"0.1.3","environmentId":"ff36b4ee-1f4b-470d-8c3a-470021271716","serverVersionReported":"0.1.3","tools":["create_threads","delegate_task","delete_scheduled_task","device_close","device_list","device_open","device_screenshot","html_preview","html_render","link_pull_request","list_scheduled_tasks","list_thread_pull_requests","orchestrator_capabilities","preview_act","preview_dialog","preview_evaluate","preview_navigate","preview_open","preview_recording_start","preview_recording_stop","preview_resize","preview_set_appearance","preview_snapshot","preview_status","preview_wait_for","read_pull_request_guide","request_secret","run_scheduled_task_now","schedule_task","t3_attachment_discard","t3_attachment_prepare_upload","t3_background_wait","t3_environment_preferences_update","t3_environment_read","t3_pending_request","t3_preview_close","t3_preview_list","t3_project_clone","t3_project_create","t3_project_delete","t3_project_list","t3_project_read","t3_project_update","t3_queue","t3_thread_configure","t3_thread_interrupt","t3_thread_launch","t3_thread_list","t3_thread_organize","t3_thread_read","t3_thread_search","t3_thread_send","t3_thread_send_attachments","t3_thread_transfer","t3_thread_update","t3_thread_wait","t3_workflow_stop","t3_worktree_handoff","t3_worktree_list","t3_worktree_status","task_cancel","task_status","unlink_pull_request","unwatch_pull_request","watch_pull_request","write_pull_request_guides"],"toolFamilies":{"configuration":"current","pendingRequests":"current"}},"cap":{"parentThreadId":null,"inheritedProviderInstanceId":null,"inheritedModel":null,"inheritedOptions":[],"runtimeMode":"full-access","interactionMode":"default","providers":[{"providerInstanceId":"codex","driverKind":"codex","displayName":"Codex","models":[],"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Codex CLI is not authenticated. Run `codex login` and try again.","Provider is not authenticated."]},{"providerInstanceId":"claudeAgent","driverKind":"claudeAgent","displayName":"Claude","models":[{"id":"claude-opus-5-5","label":"Claude Opus 5.5","options":[{"id":"effort","values":["low","medium","high","xhigh","max","ultracode","ultrathink"],"default":"medium"},{"id":"fastMode","values":[false,true]}]},{"id":"claude-sonnet-5-5","label":"Claude Sonnet 5.5","options":[{"id":"effort","values":["low","medium","high","xhigh","max","ultrathink"],"default":"high"}]},{"id":"claude-fable-5-1","label":"Claude Fable 5.1","options":[{"id":"effort","values":["low","medium","high","xhigh","max","ultracode","ultrathink"],"default":"medium"}]},{"id":"claude-haiku-5-5","label":"Claude Haiku 5.5","options":[{"id":"effort","values":["low","medium","high","xhigh","max","ultrathink"],"default":"medium"}]}],"omittedModels":9,"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Claude Code is not authenticated. Run `claude auth login` and try again.","Provider is not authenticated."]},{"providerInstanceId":"cursor","driverKind":"cursor","displayName":"Cursor","models":[],"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Provider instance is disabled."]},{"providerInstanceId":"grok","driverKind":"grok","displayName":"Grok","models":[{"id":"grok-build","label":"Grok Build"}],"runtimeModes":["approval-required","auto","full-access"],"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Provider instance is disabled."]},{"providerInstanceId":"opencode","driverKind":"opencode","displayName":"OpenCode","models":[],"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Provider instance is disabled."]},{"providerInstanceId":"antigravity","driverKind":"antigravity","displayName":"Antigravity","models":[],"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Provider instance is disabled."]},{"providerInstanceId":"fx","driverKind":"fx","displayName":"fx","models":[{"id":"default","options":[{"id":"effort","values":["auto","low","medium","high","xhigh","max"],"default":"medium"}]}],"runtimeModes":["approval-required","auto"],"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Provider instance is disabled."]},{"providerInstanceId":"muse","driverKind":"muse","displayName":"Muse Code","models":[],"runtimeModes":["approval-required","full-access"],"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Provider instance is disabled."]},{"providerInstanceId":"pi","driverKind":"pi","displayName":"Pi","models":[{"id":"default","label":"Pi default"}],"runtimeModes":["approval-required","auto-accept-edits","full-access"],"canRunChildTask":false,"canRunCrossProviderChildTask":false,"constraints":["Provider instance is disabled."]}],"features":{"appOwnedSubagents":true,"asyncPolling":true,"cancellation":true,"batchThreadCreation":true,"threadManagement":true,"incrementalThreadRead":true,"scheduledTasks":true,"maxBatchThreads":20}}}
- 
-{"command": ["project-ensure", "--root", "/home/hermesadmin/.no-mistakes/worktrees/059ad4f3960e/01M5YT7QRSMYMKZZ1FNQEV2W8C/.t3-validation/stable-project"], "exit": 0, "stdout": "{\"ok\":true,\"projectId\":\"mcp:0e664446-57e8-410b-8df9-4119fe053f92\",\"created\":true}\n", "stderr": ""}
-{"command": ["launch", "--project", "mcp:0e664446-57e8-410b-8df9-4119fe053f92", "--title", "rename compatibility validation", "--model-selection", "{\"instanceId\": \"codex\", \"model\": \"gpt-5.4\", \"options\": []}"], "exit": 0, "stdout": "{\"ok\":true,\"threadId\":\"mcp:e16f7d1c-4943-4dc7-a321-e5b5c1c5a137\",\"projectId\":\"mcp:0e664446-57e8-410b-8df9-4119fe053f92\",\"instanceId\":\"codex\",\"model\":\"gpt-5.4\",\"runId\":null,\"status\":\"idle\",\"environmentId\":\"ff36b4ee-1f4b-470d-8c3a-470021271716\",\"origin\":\"http://127.0.0.1:47233\",\"serverVersion\":\"0.1.3\"}\n", "stderr": ""}
-{"command": ["requests", "--thread", "mcp:e16f7d1c-4943-4dc7-a321-e5b5c1c5a137"], "exit": 0, "stdout": "{\"ok\":true,\"threadId\":\"mcp:e16f7d1c-4943-4dc7-a321-e5b5c1c5a137\",\"pendingRequestCount\":0,\"questions\":[],\"approvals\":0,\"signature\":\"q:;a:0\"}\n", "stderr": ""}
-{"command": ["archive", "--thread", "mcp:e16f7d1c-4943-4dc7-a321-e5b5c1c5a137"], "exit": 0, "stdout": "{\"ok\":true,\"threadId\":\"mcp:e16f7d1c-4943-4dc7-a321-e5b5c1c5a137\",\"closed\":true,\"archived\":true,\"activeRunId\":null,\"status\":\"idle\"}\n", "stderr": ""}
+REAL T3 stable: unmodified forwarding proxy records tool calls; fault scenario removes advertised tools only.
+{"command":["status"],"exitCode":0,"stdout":"{\"ok\":true,\"origin\":\"http://127.0.0.1:42001\",\"access\":\"full-access\",\"expiresAt\":\"2026-11-26T14:37:54.162Z\",\"daysLeft\":30,\"environmentId\":\"8e6a8b9b-488c-4ad5-85d2-da8de948712d\",\"serverVersion\":\"0.1.3\",\"recordedServerVersion\":\"0.1.3\",\"telemetry\":\"on\"}","stderr":"warning: T3 telemetry at http://127.0.0.1:42001 is on; run the server that hosts Firstmate workers with T3CODE_TELEMETRY_ENABLED=false (docs/t3code-backend.md)"}
+{"command":["project-ensure","--root","/home/hermesadmin/.no-mistakes/worktrees/059ad4f3960e/01M5YWCBSTYW8Y1H2TA6Z6M5MW/.test-t3-lab/project"],"exitCode":0,"stdout":"{\"ok\":true,\"projectId\":\"mcp:1b2e65a2-21b3-4e85-a65e-b30dbba37133\",\"created\":false}","stderr":""}
+{"command":["launch","--project","mcp:1b2e65a2-21b3-4e85-a65e-b30dbba37133","--title","rename-stable","--model-selection","{\"instanceId\":\"codex\",\"model\":\"gpt-6.1-sol\"}"],"exitCode":0,"stdout":"{\"ok\":true,\"threadId\":\"mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e\",\"projectId\":\"mcp:1b2e65a2-21b3-4e85-a65e-b30dbba37133\",\"instanceId\":\"codex\",\"model\":\"gpt-6.1-sol\",\"runId\":null,\"status\":\"idle\",\"environmentId\":\"8e6a8b9b-488c-4ad5-85d2-da8de948712d\",\"origin\":\"http://127.0.0.1:42001\",\"serverVersion\":\"0.1.3\"}","stderr":""}
+{"command":["requests","--thread","mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e"],"exitCode":0,"stdout":"{\"ok\":true,\"threadId\":\"mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e\",\"pendingRequestCount\":0,\"questions\":[],\"approvals\":0,\"signature\":\"q:;a:0\"}","stderr":""}
+{"command":["respond","--thread","mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e","--request","not-a-real-request","--answers-file",".test-t3-lab/answers.json"],"exitCode":3,"stdout":"{\"ok\":false,\"error\":{\"code\":\"invalid_request\",\"message\":\"T3 t3_pending_request failed: The pending user-input request was not found.\",\"tool\":\"t3_pending_request\"}}","stderr":"fm-t3-mcp: T3 t3_pending_request failed: The pending user-input request was not found."}
+{"command":["archive","--thread","mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e"],"exitCode":0,"stdout":"{\"ok\":true,\"threadId\":\"mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e\",\"closed\":true,\"archived\":true,\"activeRunId\":null,\"status\":\"idle\"}","stderr":""}
+{"command":["launch","--project","mcp:1b2e65a2-21b3-4e85-a65e-b30dbba37133","--title","must-not-launch","--model-selection","{\"instanceId\":\"codex\",\"model\":\"gpt-6.1-sol\"}"],"exitCode":4,"stdout":"{\"ok\":false,\"error\":{\"code\":\"capability_gate\",\"message\":\"T3 0.1.3 at http://127.0.0.1:42001 lacks t3_pending_request (or t3_pending_request_list, t3_pending_request_read, t3_pending_request_respond); backend=t3code needs a T3 with the Orchestrator V2 thread tools (docs/t3code-backend.md)\",\"serverVersion\":\"0.1.3\",\"missing\":[\"t3_pending_request (or t3_pending_request_list, t3_pending_request_read, t3_pending_request_respond)\"]}}","stderr":"fm-t3-mcp: T3 0.1.3 at http://127.0.0.1:42001 lacks t3_pending_request (or t3_pending_request_list, t3_pending_request_read, t3_pending_request_respond); backend=t3code needs a T3 with the Orchestrator V2 thread tools (docs/t3code-backend.md)"}
+{"command":["status"],"exitCode":4,"stdout":"{\"ok\":false,\"error\":{\"code\":\"capability_gate\",\"message\":\"T3 0.1.3 at http://127.0.0.1:42001 lacks t3_thread_configure (or t3_thread_configuration); backend=t3code needs a T3 with the Orchestrator V2 thread tools (docs/t3code-backend.md)\",\"serverVersion\":\"0.1.3\",\"missing\":[\"t3_thread_configure (or t3_thread_configuration)\"]}}","stderr":"fm-t3-mcp: T3 0.1.3 at http://127.0.0.1:42001 lacks t3_thread_configure (or t3_thread_configuration); backend=t3code needs a T3 with the Orchestrator V2 thread tools (docs/t3code-backend.md)"}
+{
+  "recordedCalls": [
+    {
+      "name": "t3_environment_read",
+      "arguments": {}
+    },
+    {
+      "name": "t3_environment_read",
+      "arguments": {}
+    },
+    {
+      "name": "t3_project_list",
+      "arguments": {
+        "limit": 100
+      }
+    },
+    {
+      "name": "t3_environment_read",
+      "arguments": {}
+    },
+    {
+      "name": "t3_thread_launch",
+      "arguments": {
+        "projectId": "mcp:1b2e65a2-21b3-4e85-a65e-b30dbba37133",
+        "title": "rename-stable",
+        "modelSelection": {
+          "instanceId": "codex",
+          "model": "gpt-6.1-sol"
+        },
+        "runtimeMode": "full-access",
+        "interactionMode": "default",
+        "workspaceStrategy": {
+          "type": "root"
+        }
+      }
+    },
+    {
+      "name": "t3_thread_read",
+      "arguments": {
+        "threadId": "mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e",
+        "limit": 1,
+        "runLimit": 1
+      }
+    },
+    {
+      "name": "t3_thread_configure",
+      "arguments": {
+        "threadId": "mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e"
+      }
+    },
+    {
+      "name": "t3_environment_read",
+      "arguments": {}
+    },
+    {
+      "name": "t3_thread_read",
+      "arguments": {
+        "threadId": "mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e",
+        "limit": 1,
+        "runLimit": 1
+      }
+    },
+    {
+      "name": "t3_environment_read",
+      "arguments": {}
+    },
+    {
+      "name": "t3_pending_request",
+      "arguments": {
+        "action": "respond",
+        "threadId": "mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e",
+        "requestId": "not-a-real-request",
+        "answers": {
+          "q1": "test"
+        }
+      }
+    },
+    {
+      "name": "t3_environment_read",
+      "arguments": {}
+    },
+    {
+      "name": "t3_thread_organize",
+      "arguments": {
+        "threadId": "mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e",
+        "action": "archive"
+      }
+    },
+    {
+      "name": "t3_thread_read",
+      "arguments": {
+        "threadId": "mcp:581c8f99-e9a9-4f71-ac8b-ef8cdf0a8c9e",
+        "limit": 1,
+        "runLimit": 1
+      }
+    }
+  ]
+}
+Observed: launch verified binding; configuration read supplied only threadId; absent question refused; archive confirmed; incomplete capability refused.

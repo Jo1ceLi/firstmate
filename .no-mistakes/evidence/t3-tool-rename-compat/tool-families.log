@@ -1,0 +1,4 @@
+{"version":"0.1.3-nightly.20261026.3740","families":{"configuration":"earlier","pendingRequests":"earlier"},"tools":["t3_pending_request_list","t3_pending_request_read","t3_pending_request_respond","t3_thread_configuration","t3_thread_configure"]}
+{"probe":"Earlier configure without modelSelection","code":"-32602","message":"T3 tools/call failed: Invalid parameters for tool 't3_thread_configure': Missing key\n  at [\"modelSelection\"]"}
+{"version":"0.1.3","families":{"configuration":"current","pendingRequests":"current"},"tools":["t3_pending_request","t3_thread_configure"]}
+{"version":"0.1.4-nightly.20261027.3770","families":{"configuration":"current","pendingRequests":"current"},"tools":["t3_pending_request","t3_thread_configure"]}
