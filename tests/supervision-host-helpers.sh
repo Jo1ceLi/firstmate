@@ -21,9 +21,12 @@ FM_SUPERVISION_HOST_HELPERS_SOURCED=1
 . "$(dirname "${BASH_SOURCE[0]}")/wake-helpers.sh"
 
 HOST="$ROOT/bin/fm-supervision-host.sh"
+# shellcheck disable=SC2034 # read by the sourcing fm-supervision-host*.test.sh files
 REPORT="$ROOT/bin/fm-branch-report.sh"
+# shellcheck disable=SC2034 # read by the sourcing fm-supervision-host*.test.sh files
 DISPATCH="$ROOT/bin/fm-branch-dispatch.mjs"
 CONTRACT="$ROOT/bin/fm-afk-contract.sh"
+# shellcheck disable=SC2034 # read by the sourcing fm-supervision-host*.test.sh files
 LEASE="$ROOT/bin/fm-lease.sh"
 
 command -v node >/dev/null 2>&1 || { printf 'skip: node absent\n'; exit 0; }
@@ -827,10 +830,12 @@ park_outcome() {  # <name> <park-seconds>; sets PARK_OUTCOME to boundary or hand
   if host_exited "$home"; then
     grep -q '^supervision-host: cycle boundary - ' "$home/host.out" || fail "$1: the host exited without the boundary: $(cat "$home/host.out")"
     ! ls "$home"/engine-call.* >/dev/null 2>&1 || fail "$1: an engine turn ran before the boundary exit"
+    # shellcheck disable=SC2034 # read by the sourcing fm-supervision-host*.test.sh files
     PARK_OUTCOME=boundary
   else
     kill -TERM "$(awk -F '\t' '$1 == "host" { print $2 }' "$home/state/.supervision-host")"
     wait_until_deadline 60 host_exited "$home" || fail "$1: the host did not stop on TERM"
+    # shellcheck disable=SC2034 # read by the sourcing fm-supervision-host*.test.sh files
     PARK_OUTCOME=handled
   fi
 }
