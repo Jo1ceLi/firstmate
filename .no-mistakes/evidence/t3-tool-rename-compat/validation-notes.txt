@@ -1,0 +1,27 @@
+本次測試只驗證 T3 工具改名相容性，沒有改動專案原始碼。
+
+實際伺服器版本：
+- 0.1.3 stable
+- 0.1.4-nightly.20261027.3770
+- 0.1.3-nightly.20261026.3740
+
+每個版本皆使用 GitHub 官方發行檔，在本次工作目錄內以獨立 HOME、XDG 目錄、T3 base-dir 及 loopback port 啟動。沒有讀取操作中的 T3 資料、模型登入或設定。每次測試結束皆停止該次啟動的伺服器。
+
+CLI 實際執行 login、status、project-ensure、launch、requests、respond、archive。launch 建立閒置執行緒，沒有傳送模型提示。問題資料依 T3 v0.1.3 的 OrchestrationV2RuntimeRequest 與 TurnItem 合約，直接建立在隔離資料庫，再由實際 T3 服務讀取、回答與保存。預期問題文字為 Which compatibility path?，預期回答為 {"q1":"both"}。三個版本都保存 resolved 狀態與正確回答，後續 requests 清單為空。這項證據證明改名後的問題工具呼叫與保存行為，未驗證模型供應商接續執行。
+
+stable 首次以 live responseCapability 建立問題，但沒有 provider session，因此 respond 被 T3 拒絕。這是測試資料設定問題。改用 T3 支援的 message responseCapability 後，三個版本皆成功。首次失敗保留於 stable-pending-live.log，通過版本為 stable-message-pending-live.log。
+
+工具呼叫紀錄透過 Node fetch 的唯讀觀察器記錄，沒有改寫請求或回應。設定讀取皆只有 threadId。舊 nightly 使用 t3_thread_configuration，其餘兩版使用 t3_thread_configure。新問題工具記錄 action list/read/respond，舊版記錄三個獨立工具。
+
+回歸對照使用相同 stable 伺服器與相同隔離憑證：base 7da4c362 的 status 退出 4，target 753f5992 退出 0。另在舊 nightly 故意以只有 threadId 呼叫 t3_thread_configure，重現要求 modelSelection 的拒絕；專用 t3_thread_configuration 成功讀取。
+
+額外執行 TMPDIR="$PWD/.t3-validation" bash tests/fm-t3-mcp.test.sh，退出 0。這組模擬傳輸測試涵蓋完整工具組檢查、兩代名稱同時提供時的選擇，以及新名稱綁定錯誤後的拒絕與封存。它不是實機證據。
+
+主要實機指令：
+python3 .t3-validation/live.py earlier 0.1.3-nightly.20261026.3740 47232
+python3 .t3-validation/live.py stable 0.1.3 47233
+python3 .t3-validation/live.py nightly 0.1.4-nightly.20261027.3770 47234
+python3 .t3-validation/regression.py
+
+driver-* 檔案保留測試步驟。重現時置於工作目錄的 .t3-validation/，移除 driver- 前綴，並準備相應官方版本。
+本次為 CLI 與協定變更，沒有 UI 變更，因此證據為 CLI 輸出、實際呼叫與保存結果，沒有截圖。

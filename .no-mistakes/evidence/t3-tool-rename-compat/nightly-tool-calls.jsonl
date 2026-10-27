@@ -1,0 +1,24 @@
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"orchestrator_capabilities","arguments":{}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_project_list","arguments":{"limit":100}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_launch","arguments":{"projectId":"mcp:06ae8a8f-6c47-4444-9400-688b587e640c","title":"rename compatibility validation","modelSelection":{"instanceId":"codex","model":"gpt-5.4","options":[]},"runtimeMode":"full-access","interactionMode":"default","workspaceStrategy":{"type":"root"}}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","limit":1,"runLimit":1}}
+{"name":"t3_thread_configure","arguments":{"threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da"}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","limit":1,"runLimit":1}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","limit":1,"runLimit":1}}
+{"name":"t3_pending_request","arguments":{"action":"list","threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da"}}
+{"name":"t3_pending_request","arguments":{"action":"read","threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","requestId":"validation-question-mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da"}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_pending_request","arguments":{"action":"respond","threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","requestId":"validation-question-mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","answers":{"q1":"both"}}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","limit":1,"runLimit":1}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_organize","arguments":{"threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","action":"archive"}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","limit":1,"runLimit":1}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:8d53ef17-0521-4ed7-a7fb-8ec4182e58da","limit":1,"runLimit":1}}

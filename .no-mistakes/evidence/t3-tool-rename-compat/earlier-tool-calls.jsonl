@@ -1,0 +1,24 @@
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"orchestrator_capabilities","arguments":{}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_project_list","arguments":{"limit":100}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_launch","arguments":{"projectId":"mcp:d978bab0-295a-4e5f-ad16-489235f639c9","title":"rename compatibility validation","modelSelection":{"instanceId":"codex","model":"gpt-5.4","options":[]},"runtimeMode":"full-access","interactionMode":"default","workspaceStrategy":{"type":"root"}}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","limit":1,"runLimit":1}}
+{"name":"t3_thread_configuration","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f"}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","limit":1,"runLimit":1}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","limit":1,"runLimit":1}}
+{"name":"t3_pending_request_list","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f"}}
+{"name":"t3_pending_request_read","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","requestId":"validation-question-mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f"}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_pending_request_respond","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","requestId":"validation-question-mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","answers":{"q1":"both"}}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","limit":1,"runLimit":1}}
+{"name":"t3_environment_read","arguments":{}}
+{"name":"t3_thread_organize","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","action":"archive"}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","limit":1,"runLimit":1}}
+{"name":"t3_thread_read","arguments":{"threadId":"mcp:3b1dbed0-b8c4-4691-ba87-0302b40cbd9f","limit":1,"runLimit":1}}
