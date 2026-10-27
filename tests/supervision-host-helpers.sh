@@ -9,6 +9,7 @@
 #   # shellcheck source=tests/supervision-host-helpers.sh
 #   . "$(dirname "${BASH_SOURCE[0]}")/supervision-host-helpers.sh"
 #
+# shellcheck disable=SC2016 # single-quoted scripts expand inside their own shells
 set -u
 
 if [ -n "${FM_SUPERVISION_HOST_HELPERS_SOURCED:-}" ]; then
