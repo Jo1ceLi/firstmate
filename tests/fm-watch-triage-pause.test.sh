@@ -6,9 +6,9 @@
 # Classifier tests in fm-watch-triage.test.sh export FM_CREW_STATE_BIN pointing
 # at a hermetic make_fake_crew_state stub and never unset it. Three launches in
 # this file pass no FM_CREW_STATE_BIN, so in the original run they inherited
-# that stub's default unknown verdict (FM_FAKE_CREW_STATE was unset). Install
-# the same hermetic fake here so those launches keep that verdict instead of
-# hitting the real bin/fm-crew-state.sh.
+# that stub's default unknown verdict. Install the same hermetic fake here so
+# those launches keep that verdict instead of hitting the real
+# bin/fm-crew-state.sh.
 set -u
 
 # shellcheck source=tests/watch-triage-helpers.sh
@@ -18,7 +18,6 @@ TMP_ROOT=$(fm_test_tmproot fm-watch-triage-pause-tests)
 mkdir -p "$TMP_ROOT/crew-state-bin"
 FM_CREW_STATE_BIN=$(make_fake_crew_state "$TMP_ROOT/crew-state-bin")
 export FM_CREW_STATE_BIN
-unset FM_FAKE_CREW_STATE
 
 # --- non-terminal stale, crew NOT provably working: surfaced immediately ------
 # The key requirement: a crew with no running pipeline that has gone quiet (and is
