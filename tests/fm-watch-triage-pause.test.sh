@@ -3,16 +3,22 @@
 # (bin/fm-watch.sh, bin/fm-classify-lib.sh). Shared fixtures live in
 # tests/watch-triage-helpers.sh.
 #
-# Classifier tests in fm-watch-triage.test.sh export FM_CREW_STATE_BIN and never
-# unset it. This file must not inherit that leak; each case that needs a fake
-# installs its own.
+# Classifier tests in fm-watch-triage.test.sh export FM_CREW_STATE_BIN pointing
+# at a hermetic make_fake_crew_state stub and never unset it. Three launches in
+# this file pass no FM_CREW_STATE_BIN, so in the original run they inherited
+# that stub's default unknown verdict (FM_FAKE_CREW_STATE was unset). Install
+# the same hermetic fake here so those launches keep that verdict instead of
+# hitting the real bin/fm-crew-state.sh.
 set -u
 
 # shellcheck source=tests/watch-triage-helpers.sh
 . "$(dirname "${BASH_SOURCE[0]}")/watch-triage-helpers.sh"
 
 TMP_ROOT=$(fm_test_tmproot fm-watch-triage-pause-tests)
-unset FM_CREW_STATE_BIN
+mkdir -p "$TMP_ROOT/crew-state-bin"
+FM_CREW_STATE_BIN=$(make_fake_crew_state "$TMP_ROOT/crew-state-bin")
+export FM_CREW_STATE_BIN
+unset FM_FAKE_CREW_STATE
 
 # --- non-terminal stale, crew NOT provably working: surfaced immediately ------
 # The key requirement: a crew with no running pipeline that has gone quiet (and is
@@ -1423,6 +1429,11 @@ test_paused_bg_job_until_timeout_rechecks_after_the_job_ends() {
     || fail "the due recheck repeated instead of returning to the cadence"
   pass "until set to a background job's timeout rechecks the worker paused on it once the job must have ended"
 }
+
+if [ -n "${FM_TEST_ONLY:-}" ]; then
+  "$FM_TEST_ONLY"
+  exit 0
+fi
 
 fm_test_run \
   test_nonterminal_stale_not_working_surfaced \

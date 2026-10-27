@@ -2,17 +2,12 @@
 # Behavior tests for watcher wedge-threshold deferrals to declared waits,
 # captain holds, parked gates, worker blockers, and validation runs
 # (bin/fm-watch.sh). Shared fixtures live in tests/watch-triage-helpers.sh.
-#
-# Classifier tests in fm-watch-triage.test.sh export FM_CREW_STATE_BIN and never
-# unset it. This file must not inherit that leak; each case that needs a fake
-# installs its own.
 set -u
 
 # shellcheck source=tests/watch-triage-helpers.sh
 . "$(dirname "${BASH_SOURCE[0]}")/watch-triage-helpers.sh"
 
 TMP_ROOT=$(fm_test_tmproot fm-watch-triage-wedge-defer-tests)
-unset FM_CREW_STATE_BIN
 
 # Arm the opt-in parked-gate wait evidence for a fixture built above.
 arm_parked_gate() {  # <case-dir>
@@ -971,6 +966,11 @@ test_wedge_threshold_validating_run_is_off_until_armed() {
     || fail "an unarmed home started a validating deferral chain"
   pass "with config/wedge-defer-validating absent a running validation keeps the unchanged ladder, wording and reads"
 }
+
+if [ -n "${FM_TEST_ONLY:-}" ]; then
+  "$FM_TEST_ONLY"
+  exit 0
+fi
 
 fm_test_run \
   test_wedge_threshold_defers_to_a_declared_wait_under_a_working_verdict \
